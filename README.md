@@ -41,8 +41,39 @@ Note 20% corresponds to random chance.
 | Qwen 0.5B | Int8 | 26.05%   | 21.95%              | -4.10%     |
 
 ### Sparse model training results
-The grouped and LoRA linear layers reduced the number of parameters of the Qwen 0.5B model from 494,032,768 to 
+The grouped and LoRA linear layers reduced the number of parameters of the Qwen 0.5B model from 494,032,768 to 357,980,032.
 The teacher model correctly answers the sample question. After training the output of each sparse linear projection against the output of the original dense linear projection for 4 epochs, and fine-fine tuning on the Platypus dataset for 1 epoch, the student model is unable to answer the question.
+
+```python
+Qwen2ForCausalLM(
+  (model): Qwen2Model(
+    (embed_tokens): Embedding(151936, 896)
+    (layers): ModuleList(
+      (0-23): 24 x Qwen2DecoderLayer(
+        (self_attn): Qwen2SdpaAttention(
+          (q_proj): GroupLoRALinear(in_features=896, out_features=896, groups=4, in_group_size=224, out_group_size=224, bias=True)
+          (k_proj): Linear(in_features=896, out_features=128, bias=True)
+          (v_proj): Linear(in_features=896, out_features=128, bias=True)
+          (o_proj): GroupLoRALinear(in_features=896, out_features=896, groups=4, in_group_size=224, out_group_size=224, bias=False)
+          (rotary_emb): Qwen2RotaryEmbedding()
+        )
+        (mlp): Qwen2MLP(
+          (gate_proj): GroupLoRALinear(in_features=896, out_features=4864, groups=4, in_group_size=224, out_group_size=1216, bias=False)
+          (up_proj): GroupLoRALinear(in_features=896, out_features=4864, groups=4, in_group_size=224, out_group_size=1216, bias=False)
+          (down_proj): GroupLoRALinear(in_features=4864, out_features=896, groups=4, in_group_size=1216, out_group_size=224, bias=False)
+          (act_fn): SiLU()
+        )
+        (input_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+        (post_attention_layernorm): Qwen2RMSNorm((896,), eps=1e-06)
+      )
+    )
+    (norm): Qwen2RMSNorm((896,), eps=1e-06)
+    (rotary_emb): Qwen2RotaryEmbedding()
+  )
+  (lm_head): Linear(in_features=896, out_features=151936, bias=False)
+)
+```
+
 
 #### Sample Question
 A board game spinner is divided into three parts labeled $A$, $B$  and $C$. The probability of the spinner landing on $A$ is $\frac{1}{3}$ and the probability of the spinner landing on $B$ is $\frac{5}{12}$.  What is the probability of the spinner landing on $C$? Express your answer as a common fraction.
