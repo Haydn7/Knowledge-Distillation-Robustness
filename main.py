@@ -108,7 +108,7 @@ def run_training(args):
         train_replacement_modules_on_teacher_modules(teacher, student, train_dataloader, lambda obj: isinstance(obj, GroupLoRALinear),
                                                      checkpointer, epochs=args.epochs, lr=4.e-3)
     if args.knowledge_distillation:
-        epochs = 2 * args.epochs if args.replaec else args.epochs
+        epochs = 2 * args.epochs if args.replace else args.epochs
         train_knowledge_distillation(teacher, student, train_dataloader, tokenizer, checkpointer, lr=1.e-5, epochs=epochs)
 
     if args.test:
